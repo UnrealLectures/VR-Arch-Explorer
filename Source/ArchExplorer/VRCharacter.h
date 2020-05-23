@@ -1,0 +1,54 @@
+// Copyright Jeff Brown 2020
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/Character.h"
+#include "VRCharacter.generated.h"
+
+UCLASS()
+class ARCHEXPLORER_API AVRCharacter : public ACharacter
+{
+  GENERATED_BODY()
+
+public:
+  // Sets default values for this character's properties
+  AVRCharacter();
+
+protected:
+  // Called when the game starts or when spawned
+  virtual void BeginPlay() override;
+
+public:
+  // Called every frame
+  virtual void Tick(float DeltaTime) override;
+
+  // Called to bind functionality to input
+  virtual void SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) override;
+
+private:
+  void UpdateDestinationMarker();
+
+  void MoveForward(float throttle);
+  void MoveRight(float throttle);
+
+  void BeginTeleport();
+  void FinishTeleport();
+
+private:
+  UPROPERTY(VisibleAnywhere)
+  class USceneComponent *VRRoot;
+
+  UPROPERTY(VisibleAnywhere)
+  class UCameraComponent *Camera;
+
+  UPROPERTY(VisibleAnywhere)
+  class UStaticMeshComponent *DestinationMarker;
+
+private: // configurable parameters
+  UPROPERTY(EditAnywhere)
+  float MaxTeleportDistance = 1000.f; // 10 meters
+
+  UPROPERTY(EditAnywhere)
+  float TeleportFadeTime = 0.8f; // Half-Second fade
+};

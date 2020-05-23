@@ -76,7 +76,9 @@ Plugins/*/Intermediate/*
 # Cache files for the editor to use
 DerivedDataCache/*
 
-VSCode Files
+# VSCode Files
 /.vscode/*
 ArchExplorer.code-workspace
 
+# Imports
+Content/ArchVizAssets/*

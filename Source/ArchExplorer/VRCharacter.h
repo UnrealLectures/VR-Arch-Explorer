@@ -27,10 +27,12 @@ public:
   virtual void SetupPlayerInputComponent(class UInputComponent *PlayerInputComponent) override;
 
 private: // Methods
-  bool FindTeleportDestination(FVector &Location);
+  bool FindTeleportDestination(TArray<FVector> &OutPath, FVector &OutLocation);
   void UpdateDestinationMarker();
   void UpdateBlinkers();
   FVector2D GetBlinkerCenter();
+  void DrawTeleportPath(const TArray<FVector> &Path);
+  void UpdateSpline(const TArray<FVector> &Path);
 
   void MoveForward(float throttle);
   void MoveRight(float throttle);
@@ -54,6 +56,9 @@ private: // Components
   class UMotionControllerComponent *RightHandController;
 
   UPROPERTY(VisibleAnywhere)
+  class USplineComponent *TeleportPath;
+
+  UPROPERTY(VisibleAnywhere)
   class UStaticMeshComponent *DestinationMarker;
 
   UPROPERTY(VisibleAnywhere)
@@ -62,9 +67,18 @@ private: // Components
   UPROPERTY(VisibleAnywhere)
   class UMaterialInstanceDynamic *BlinkerMaterialInstance;
 
+  UPROPERTY(VisibleAnywhere)
+  TArray<class UStaticMeshComponent *> TeleportPathMeshPool;
+
 private: // configurable parameters
   UPROPERTY(EditAnywhere)
-  float MaxTeleportDistance = 1000.f; // 10 meters
+  float TeleportProjectileRadius = 10.f;
+
+  UPROPERTY(EditAnywhere)
+  float TeleportProjectileSpeed = 1000.f; // 10 cm/s
+
+  UPROPERTY(EditAnywhere)
+  float TeleportSimulationTime = 3.f; // 10 s
 
   UPROPERTY(EditAnywhere)
   float TeleportFadeTime = 0.2f; // Half-Second fade
@@ -77,4 +91,10 @@ private: // configurable parameters
 
   UPROPERTY(EditAnywhere)
   class UCurveFloat *RadiusVsVelocity;
+
+  UPROPERTY(EditDefaultsOnly)
+  class UStaticMesh *TeleportArcMesh;
+
+  UPROPERTY(EditDefaultsOnly)
+  class UMaterialInstance *TeleportArcMaterial;
 };

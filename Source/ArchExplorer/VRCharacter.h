@@ -37,6 +37,7 @@ private: // Methods
   void MoveForward(float throttle);
   void MoveRight(float throttle);
 
+  void EnableTeleportation(float throttle);
   void BeginTeleport();
   void FinishTeleport();
 
@@ -71,6 +72,12 @@ private: // Components
   TArray<class USplineMeshComponent *> TeleportPathMeshPool;
 
 private: // configurable parameters
+  UPROPERTY(EditAnywhere)
+  bool bTeleportEnabled = false;
+
+  UPROPERTY(EditAnywhere)
+  float TeleportThumbstickThreshold = -0.4f;
+
   UPROPERTY(EditAnywhere)
   float TeleportProjectileRadius = 10.f;
 

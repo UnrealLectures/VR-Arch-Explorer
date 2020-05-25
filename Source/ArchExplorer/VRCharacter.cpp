@@ -88,6 +88,8 @@ void AVRCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputCompone
 
   PlayerInputComponent->BindAxis(TEXT("Forward"), this, &AVRCharacter::MoveForward);
   PlayerInputComponent->BindAxis(TEXT("Right"), this, &AVRCharacter::MoveRight);
+  PlayerInputComponent->BindAxis(TEXT("ShowTeleport"), this, &AVRCharacter::EnableTeleportation);
+
   PlayerInputComponent->BindAction(TEXT("Teleport"), IE_Released, this, &AVRCharacter::BeginTeleport);
 }
 
@@ -132,7 +134,7 @@ void AVRCharacter::UpdateDestinationMarker()
   TArray<FVector> Path;
   bool bHasDestination = FindTeleportDestination(Path, NavLocation);
 
-  if (bHasDestination)
+  if (bHasDestination && bTeleportEnabled)
   {
     DestinationMarker->SetVisibility(true);
     DestinationMarker->SetWorldLocation(NavLocation);
@@ -252,8 +254,25 @@ void AVRCharacter::MoveRight(float throttle)
   AddMovementInput(throttle * Camera->GetRightVector());
 }
 
+void AVRCharacter::EnableTeleportation(float throttle)
+{
+  if (throttle < TeleportThumbstickThreshold)
+  {
+    bTeleportEnabled = true;
+  }
+  else
+  {
+    bTeleportEnabled = false;
+  }
+  //UE_LOG(LogTemp, Warning, TEXT("RThumbstick value: %f"), throttle);
+}
+
 void AVRCharacter::BeginTeleport()
 {
+  if (!bTeleportEnabled)
+  {
+    return;
+  }
   StartFade(0, 1);
 
   FTimerHandle TimerHandle;

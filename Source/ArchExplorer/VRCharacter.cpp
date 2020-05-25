@@ -12,7 +12,6 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Curves/CurveFloat.h"
 #include "Kismet/GameplayStatics.h"
-#include "HandController.h"
 
 #include "DrawDebugHelpers.h"
 
@@ -65,6 +64,11 @@ void AVRCharacter::BeginPlay()
     RightHandController->SetHand(EControllerHand::Right);
     RightHandController->SetOwner(this); // FIX FOR 4.22
   }
+
+  if (RightHandController != nullptr && LeftHandController != nullptr)
+  {
+    LeftHandController->PairController(RightHandController);
+  }
 }
 
 // Called every frame
@@ -91,6 +95,11 @@ void AVRCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputCompone
   PlayerInputComponent->BindAxis(TEXT("ShowTeleport"), this, &AVRCharacter::EnableTeleportation);
 
   PlayerInputComponent->BindAction(TEXT("Teleport"), IE_Released, this, &AVRCharacter::BeginTeleport);
+
+  PlayerInputComponent->BindAction(TEXT("GripLeft"), IE_Pressed, this, &AVRCharacter::GripLeft);
+  PlayerInputComponent->BindAction(TEXT("GripLeft"), IE_Released, this, &AVRCharacter::ReleaseLeft);
+  PlayerInputComponent->BindAction(TEXT("GripRight"), IE_Pressed, this, &AVRCharacter::GripRight);
+  PlayerInputComponent->BindAction(TEXT("GripRight"), IE_Released, this, &AVRCharacter::ReleaseRight);
 }
 
 bool AVRCharacter::FindTeleportDestination(TArray<FVector> &OutPath, FVector &OutLocation)

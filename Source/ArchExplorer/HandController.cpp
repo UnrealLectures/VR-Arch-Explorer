@@ -1,6 +1,10 @@
 // Copyright Jeff Brown 2020
 
 #include "HandController.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/PlayerController.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AHandController::AHandController()
@@ -16,10 +20,91 @@ AHandController::AHandController()
 void AHandController::BeginPlay()
 {
   Super::BeginPlay();
+
+  OnActorBeginOverlap.AddDynamic(this, &AHandController::ActorBeginOverlap);
+  OnActorEndOverlap.AddDynamic(this, &AHandController::ActorEndOverlap);
 }
 
 // Called every frame
 void AHandController::Tick(float DeltaTime)
 {
   Super::Tick(DeltaTime);
+  if (bIsClimbing)
+  {
+    FVector HandControllerDelta = GetActorLocation() - ClimbingStartLocation;
+    GetAttachParentActor()->AddActorWorldOffset(-HandControllerDelta); // Update actor position to be opposite of grab location
+  }
+}
+
+void AHandController::ActorBeginOverlap(AActor *OverlappedActor, AActor *OtherActor)
+{
+  bool bNewCanClimb = CanClimb();
+  if (!bCanClimb && bNewCanClimb)
+  {
+    APawn *Pawn = Cast<APawn>(GetAttachParentActor());
+    if (!Pawn)
+      return;
+    APlayerController *Controller = Cast<APlayerController>(Pawn->GetController());
+    if (!Controller)
+      return;
+    Controller->PlayHapticEffect(HapticEffect, MotionController->GetTrackingSource());
+  }
+  bCanClimb = bNewCanClimb;
+}
+
+void AHandController::ActorEndOverlap(AActor *OverlappedActor, AActor *OtherActor)
+{
+  bCanClimb = CanClimb();
+}
+
+bool AHandController::CanClimb() const
+{
+  TArray<AActor *> OverlappingActors;
+  GetOverlappingActors(OverlappingActors);
+  for (AActor *OverlappingActor : OverlappingActors)
+  {
+    if (OverlappingActor->ActorHasTag(TEXT("Climbable")))
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+void AHandController::PairController(AHandController *Controller)
+{
+  OtherController = Controller;
+  OtherController->OtherController = this;
+}
+
+void AHandController::Grip()
+{
+  if (!bCanClimb)
+    return;
+  if (!bIsClimbing)
+  {
+    bIsClimbing = true;
+    ClimbingStartLocation = GetActorLocation();
+
+    OtherController->bIsClimbing = false;
+
+    ACharacter *Character = Cast<ACharacter>(GetAttachParentActor());
+    if (Character != nullptr)
+    {
+      Character->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
+    }
+  }
+}
+
+void AHandController::Release()
+{
+  if (bIsClimbing)
+  {
+    ACharacter *Character = Cast<ACharacter>(GetAttachParentActor());
+    if (Character != nullptr)
+    {
+      Character->GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Falling);
+    }
+  }
+  bIsClimbing = false;
 }

@@ -50,10 +50,10 @@ private: // Components
   class UCameraComponent *Camera;
 
   UPROPERTY(VisibleAnywhere)
-  class UMotionControllerComponent *LeftHandController;
+  class AHandController *LeftHandController;
 
   UPROPERTY(VisibleAnywhere)
-  class UMotionControllerComponent *RightHandController;
+  class AHandController *RightHandController;
 
   UPROPERTY(VisibleAnywhere)
   class USplineComponent *TeleportPath;
@@ -68,7 +68,7 @@ private: // Components
   class UMaterialInstanceDynamic *BlinkerMaterialInstance;
 
   UPROPERTY(VisibleAnywhere)
-  TArray<class UStaticMeshComponent *> TeleportPathMeshPool;
+  TArray<class USplineMeshComponent *> TeleportPathMeshPool;
 
 private: // configurable parameters
   UPROPERTY(EditAnywhere)
@@ -97,4 +97,7 @@ private: // configurable parameters
 
   UPROPERTY(EditDefaultsOnly)
   class UMaterialInstance *TeleportArcMaterial;
+
+  UPROPERTY(EditDefaultsOnly)
+  TSubclassOf<AHandController> HandControllerClass;
 };
